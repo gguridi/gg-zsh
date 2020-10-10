@@ -1,0 +1,19 @@
+#compdef fa
+#autoload
+
+local -a _1st_arguments
+_1st_arguments=(
+  'fa:jira a jira ticket from the branch'
+  'fa:github the github url of the origin of the current repo'
+)
+
+_arguments -C \
+  ':command:->command' \
+  '*::options:->options'
+
+case $state in
+  (command)
+    _describe -t commands "gg subcommand" _1st_arguments
+    return
+   ;;
+esac

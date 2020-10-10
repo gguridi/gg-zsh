@@ -1,0 +1,36 @@
+_aws_instances() {
+    local query="
+        Reservations[*].Instances[*].[
+            Tags[?Key=='Name'].Value | [0],
+            Tags[?Key=='product'].Value | [0],
+            Tags[?Key=='environment'].Value | [0],
+            LaunchTime,
+            PublicDnsName,
+            Tags[?Key=='kafka-id'].Value | [0]
+        ]
+    "
+
+    local filters="
+        Name=instance-state-name,
+        Values=running
+    " | xargs
+
+    aws ec2 describe-instances --query "$query" --filters "$filters" --output text
+}
+
+_fzf_complete_ssh() {
+    ARGS="$@"
+    local machines
+    machines=$(aws ec2 describe-instances --query "Reservations[*].Instances[*].[Tags[?Key=='Name'].Value | [0],Tags[?Key=='product'].Value | [0], Tags[?Key=='environment'].Value | [0], LaunchTime, PublicDnsName ]" --filters Name=instance-state-name,Values=running --output text |  tr ' ' '-' | column -ts $'\t')
+    if [[ $ARGS == 'ssh '* ]]; then
+        _fzf_complete "--reverse --multi" "$@" < <(
+            echo $machines
+        )
+    else
+        eval "zle ${fzf_default_completion:-expand-or-complete}"
+    fi
+}
+
+_fzf_complete_ssh_post() {
+    awk '{print $5}'
+}
