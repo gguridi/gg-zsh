@@ -12,9 +12,9 @@ function fa_jira_open() {
 
 function fa_github_open() {
     local url=$(git config --get remote.origin.url)
-    if [[ url == git* ]]; then
-        https_url=${url/"git@"/"https://"}
+    if [[ $url == git* ]]; then
         url=${url/":"/"/"}
+        url=${url/"git@"/"https://"}
     fi
     echo "opening github remote url ${url} ..."
     open_command "${url}"
